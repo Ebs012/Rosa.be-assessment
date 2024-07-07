@@ -31,14 +31,14 @@ resource "aws_internet_gateway" "gw" {
 resource "aws_subnet" "app_subnet" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "eu-central-1a"
+  availability_zone       = "eu-west-2a"
   map_public_ip_on_launch = true
 }
 
 resource "aws_subnet" "app_subnet_2" {
   vpc_id                  = aws_vpc.app_vpc.id
   cidr_block              = "10.0.2.0/24"
-  availability_zone       = "eu-central-1b"
+  availability_zone       = "eu-west-2b"
   map_public_ip_on_launch = true
 }
 
