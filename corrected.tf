@@ -132,7 +132,7 @@ resource "aws_lb_listener" "listener" {
   }
 }
 
-# Auto Scaling
+# Auto Scaling (modified with memory-utilization, cooldown period and step scaling policy)
 resource "aws_appautoscaling_target" "ecs_target" {
   max_capacity       = 10
   min_capacity       = 1
@@ -150,11 +150,30 @@ resource "aws_appautoscaling_policy" "ecs_policy" {
 
   target_tracking_scaling_policy_configuration {
     target_value = 75
+    scale_in_cooldown  = 300  # Adding a cooldown period for scaling in
+    scale_out_cooldown = 300  # Adding a cooldown period for scaling out
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
     }
   }
 }
+
+resource "aws_appautoscaling_policy" "memory_policy" {
+  name               = "memory_policy"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.ecs_target.resource_id
+  scalable_dimension = aws_appautoscaling_target.ecs_target.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.ecs_target.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = 75
+    scale_in_cooldown  = 300  # Cooldown period for scaling in
+    scale_out_cooldown = 300  # Cooldown period for scaling out
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
+    }
+  }
+} 
 
 resource "aws_security_group" "alb_sg" {
   name        = "alb-sg"
